@@ -23,6 +23,8 @@ Na página **Releases** deste repositório (menu à direita), na versão **"Faix
 | Android TV, Google TV, celular | `FaixaLivreTV.apk` |
 
 Os arquivos são gerados sozinhos pelo GitHub a cada mudança (aba **Actions**), em cerca de 10 minutos.
+Como este repositório é **privado**, os downloads da página Releases só funcionam para quem está logado
+na conta dona do repositório. Para outras pessoas, use o endereço do site (TV) ou torne o repositório público.
 
 ## Instalar no Windows
 
@@ -37,7 +39,9 @@ Os arquivos são gerados sozinhos pelo GitHub a cada mudança (aba **Actions**),
 2. Nas configurações da TV, permita que o **Downloader** instale apps desconhecidos
    (Configurações > Apps > Segurança e restrições > Fontes desconhecidas > Downloader).
 3. No Downloader, digite o endereço:
-   `https://github.com/bragajosmar-glitch/faixa-livre-tv-app/releases/latest/download/FaixaLivreTV.apk`
+   `faixa-livre-tv.web.app/FaixaLivreTV.apk`
+   (o arquivo fica no próprio site do app; ao gerar uma versão nova, copie o `FaixaLivreTV.apk`
+   da página Releases para a pasta do site e publique de novo)
 4. Confirme a instalação. O app aparece na tela inicial da TV com o banner do Faixa Livre TV.
 
 No controle remoto: setas e OK navegam, **Voltar** sai da tela cheia e volta ao Início,
