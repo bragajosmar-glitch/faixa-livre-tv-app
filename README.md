@@ -42,9 +42,8 @@ na conta dona do repositório. Para outras pessoas, use o endereço do site (TV)
 2. Nas configurações da TV, permita que o **Downloader** instale apps desconhecidos
    (Configurações > Apps > Segurança e restrições > Fontes desconhecidas > Downloader).
 3. No Downloader, digite o endereço:
-   `faixa-livre-tv.web.app/FaixaLivreTV.apk`
-   (o arquivo fica no próprio site do app; ao gerar uma versão nova, copie o `FaixaLivreTV.apk`
-   da página Releases para a pasta do site e publique de novo)
+   `https://github.com/bragajosmar-glitch/faixa-livre-tv-app/releases/latest/download/FaixaLivreTV.apk`
+   (funciona só com o repositório **público**; o site no Firebase gratuito não aceita arquivos .apk)
 4. Confirme a instalação. O app aparece na tela inicial da TV com o banner do Faixa Livre TV.
 
 No controle remoto: setas e OK navegam, **Voltar** sai da tela cheia e volta ao Início,
