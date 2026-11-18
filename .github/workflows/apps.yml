@@ -1,0 +1,85 @@
+# Gera os apps do Faixa Livre TV a cada atualização e publica na página "Releases" do repositório.
+name: Gerar os apps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows (.exe)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npx electron-builder --win --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: desktop/dist/*.exe
+
+  android:
+    name: Android TV e celular (.apk)
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      # Chave oficial (para a Play Store), se estiver guardada nos segredos do repositório
+      - name: Chave de assinatura oficial
+        if: ${{ env.KEYSTORE_B64 != '' }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/oficial.keystore"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/oficial.keystore" >> "$GITHUB_ENV"
+      - name: Montar o app
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: gradle -p android assembleRelease --no-daemon
+      - run: cp android/app/build/outputs/apk/release/app-release.apk FaixaLivreTV.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: FaixaLivreTV.apk
+
+  publicar:
+    name: Publicar na página de downloads
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: arquivos
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ultima
+          name: Faixa Livre TV - versão mais recente
+          make_latest: true
+          files: arquivos/*
+          body: |
+            Versão gerada automaticamente (montagem nº ${{ github.run_number }}).
+
+            - **Windows:** `FaixaLivreTV-instalador.exe` (instala) ou `FaixaLivreTV-portatil.exe` (abre sem instalar).
+            - **Android TV, Google TV e celular:** `FaixaLivreTV.apk`.
+
+            Endereço curto para a TV (app Downloader):
+            https://github.com/${{ github.repository }}/releases/latest/download/FaixaLivreTV.apk

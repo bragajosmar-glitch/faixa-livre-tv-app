@@ -1,0 +1,28 @@
+{
+  "name": "faixa-livre-tv",
+  "productName": "Faixa Livre TV",
+  "version": "1.0.0",
+  "description": "Canais de TV abertos e gratuitos, ao vivo",
+  "author": "Josmar Braga",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "br.faixalivre.tv",
+    "productName": "Faixa Livre TV",
+    "files": ["main.js", "preload.js", "build/icon.png"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "win": { "target": ["nsis", "portable"], "icon": "build/icon.png" },
+    "nsis": { "oneClick": true, "perMachine": false, "shortcutName": "Faixa Livre TV", "artifactName": "FaixaLivreTV-instalador.${ext}" },
+    "portable": { "artifactName": "FaixaLivreTV-portatil.${ext}" },
+    "mac": { "target": "dmg", "icon": "build/icon.png", "category": "public.app-category.entertainment" },
+    "linux": { "target": "AppImage", "icon": "build/icon.png", "category": "AudioVideo" }
+  }
+}
