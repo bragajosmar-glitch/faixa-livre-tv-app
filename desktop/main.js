@@ -74,9 +74,17 @@ function criarJanela() {
     if (!PROPRIOS.test(hostDe(url))) { e.preventDefault(); if (/^https?:/i.test(url)) shell.openExternal(url); }
   });
 
-  // F11 liga e desliga a tela cheia da janela
-  janela.webContents.on("before-input-event", (e, input) => {
-    if (input.type === "keyDown" && input.key === "F11") { janela.setFullScreen(!janela.isFullScreen()); e.preventDefault(); }
+  // F11 tela cheia · F5 ou Ctrl+R recarrega · Ctrl+Shift+R recarrega limpando a cópia guardada do site
+  janela.webContents.on("before-input-event", async (e, input) => {
+    if (input.type !== "keyDown") return;
+    const k = (input.key || "").toLowerCase();
+    if (input.key === "F11"){ e.preventDefault(); janela.setFullScreen(!janela.isFullScreen()); }
+    else if ((input.control || input.meta) && input.shift && k === "r"){
+      e.preventDefault();
+      try { await sessao.clearCache(); await sessao.clearStorageData({ storages: ["serviceworkers", "cachestorage"] }); } catch {}
+      janela.webContents.reloadIgnoringCache();
+    }
+    else if (input.key === "F5" || ((input.control || input.meta) && k === "r")){ e.preventDefault(); janela.webContents.reload(); }
   });
 
   janela.webContents.on("did-fail-load", (_e, _code, _desc, _url, principal) => {

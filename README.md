@@ -31,7 +31,10 @@ na conta dona do repositório. Para outras pessoas, use o endereço do site (TV)
 1. Baixe `FaixaLivreTV-instalador.exe` e abra.
 2. Se aparecer **"O Windows protegeu o computador"**, clique em **Mais informações** e depois em **Executar assim mesmo**.
    (O aviso aparece porque o programa ainda não tem assinatura digital paga.)
-3. O Faixa Livre TV abre e fica no menu Iniciar. **F11** liga e desliga a tela cheia.
+3. O Faixa Livre TV abre e fica no menu Iniciar.
+   - **F11**: tela cheia.
+   - **F5**: recarregar.
+   - **Ctrl+Shift+R**: recarregar limpando a cópia guardada do site (use depois de publicar uma versão nova do site).
 
 ## Instalar na TV (Android TV / Google TV)
 
