@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
+    private var destruida = false
     private val appUrl = "https://faixa-livre-tv.web.app/"
     private val cabecalhos = ConcurrentHashMap<String, Pair<String?, String?>>() // servidor -> (referer, user agent)
     private val erros = ConcurrentHashMap<String, String>() // endereço ou "host:servidor" -> último erro de rede
@@ -88,6 +89,14 @@ class MainActivity : Activity() {
                 val host = u.host ?: return null
                 if (dominio(host, semMexer)) return null
                 return buscar(u.toString(), req.requestHeaders)
+            }
+
+            // se o processo que desenha a página cair (falta de memória), recomeça a tela em vez de fechar o app
+            override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                try { (view.parent as? android.view.ViewGroup)?.removeView(view); view.destroy() } catch (_: Exception) {}
+                destruida = true
+                recreate()
+                return true
             }
 
             override fun onReceivedError(view: WebView, req: WebResourceRequest, error: WebResourceError) {
@@ -220,12 +229,12 @@ class MainActivity : Activity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        web.saveState(outState)
+        if (!destruida) web.saveState(outState)
     }
 
-    override fun onPause() { super.onPause(); web.onPause() }
-    override fun onResume() { super.onResume(); web.onResume() }
-    override fun onDestroy() { web.destroy(); super.onDestroy() }
+    override fun onPause() { super.onPause(); if (!destruida) web.onPause() }
+    override fun onResume() { super.onResume(); if (!destruida) web.onResume() }
+    override fun onDestroy() { if (!destruida) try { web.destroy() } catch (_: Exception) {}; super.onDestroy() }
 
     companion object {
         private const val SEM_INTERNET = """<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

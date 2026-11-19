@@ -108,12 +108,28 @@ function criarJanela() {
     else if (input.key === "F5" || ((input.control || input.meta) && k === "r")){ e.preventDefault(); janela.webContents.reload(); }
   });
 
+  // se a tela travar ou o processo que desenha a página cair (falta de memória, falha de vídeo),
+  // recarrega sozinho e o site volta ao último canal
+  let travouT = null;
+  const recarregar = motivo => {
+    console.log("Faixa Livre TV: recarregando (" + motivo + ")");
+    if (janela && !janela.isDestroyed()) janela.webContents.reload();
+  };
+  janela.webContents.on("render-process-gone", (_e, d) => { if (d.reason !== "clean-exit") setTimeout(() => recarregar(d.reason), 800); });
+  janela.on("unresponsive", () => { clearTimeout(travouT); travouT = setTimeout(() => { try { janela.webContents.forcefullyCrashRenderer(); } catch {} setTimeout(() => recarregar("travou"), 500); }, 20000); });
+  janela.on("responsive", () => clearTimeout(travouT));
+
   janela.webContents.on("did-fail-load", (_e, _code, _desc, _url, principal) => {
     if (principal) janela.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(SEM_INTERNET));
   });
 
   janela.loadURL(APP_URL);
 }
+
+// falha da placa de vídeo: o Chromium reinicia a parte gráfica, mas a página pode ficar preta; recarrega
+app.on("child-process-gone", (_e, d) => {
+  if (d.type === "GPU" && d.reason !== "clean-exit" && janela && !janela.isDestroyed()) setTimeout(() => janela.webContents.reload(), 1500);
+});
 
 app.on("second-instance", () => { if (janela) { if (janela.isMinimized()) janela.restore(); janela.focus(); } });
 app.whenReady().then(criarJanela);
