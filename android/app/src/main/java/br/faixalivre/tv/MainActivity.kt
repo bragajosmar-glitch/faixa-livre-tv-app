@@ -193,7 +193,9 @@ class MainActivity : Activity() {
                 KeyEvent.KEYCODE_CHANNEL_UP, KeyEvent.KEYCODE_MEDIA_NEXT -> "chup"
                 KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS -> "chdown"
                 KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_MEDIA_PLAY, KeyEvent.KEYCODE_MEDIA_PAUSE -> "playpause"
-                KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_GUIDE -> "info"
+                KeyEvent.KEYCODE_INFO -> "info"
+                KeyEvent.KEYCODE_GUIDE, KeyEvent.KEYCODE_TV_DATA_SERVICE -> "guide"
+                KeyEvent.KEYCODE_LAST_CHANNEL -> "last"
                 else -> null
             }
             if (acao != null) { js("window.FaixaLivreTVKey && window.FaixaLivreTVKey('$acao')"); return true }
