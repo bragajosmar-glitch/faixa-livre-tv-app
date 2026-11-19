@@ -20,6 +20,14 @@ ipcMain.on("fltv-headers", (_e, d) => {
   try { cabecalhos.set(new URL(d.url).host, { referer: d.referer || "", ua: d.ua || "" }); } catch {}
 });
 
+// último erro de rede de cada endereço: o site mostra o motivo real quando um canal não abre
+const erros = new Map();
+ipcMain.handle("fltv-erro", (_e, url) => {
+  const u = String(url || ""); if (erros.has(u)) return erros.get(u);
+  let host = ""; try { host = new URL(u).host; } catch {}
+  return erros.get("host:" + host) || "";
+});
+
 const hostDe = u => { try { return new URL(u).hostname; } catch { return ""; } };
 
 const SEM_INTERNET = `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Faixa Livre TV</title>
@@ -64,6 +72,12 @@ function criarJanela() {
     cb({ responseHeaders: h });
   });
 
+  sessao.webRequest.onErrorOccurred(d => {
+    if (d.resourceType === "mainFrame") return;
+    erros.set(d.url, d.error); try { erros.set("host:" + new URL(d.url).host, d.error); } catch {}
+    if (erros.size > 400) erros.delete(erros.keys().next().value);
+  });
+
   // janelas novas: o login do Google abre dentro do app; o resto vai para o navegador do computador
   janela.webContents.setWindowOpenHandler(({ url }) => {
     if (/(^|\.)accounts\.google\.com$/i.test(hostDe(url))) return { action: "allow" };
@@ -74,11 +88,12 @@ function criarJanela() {
     if (!PROPRIOS.test(hostDe(url))) { e.preventDefault(); if (/^https?:/i.test(url)) shell.openExternal(url); }
   });
 
-  // F11 tela cheia · F5 ou Ctrl+R recarrega · Ctrl+Shift+R recarrega limpando a cópia guardada do site
+  // F11 tela cheia · F12 ferramentas de diagnóstico · F5 ou Ctrl+R recarrega · Ctrl+Shift+R recarrega limpando a cópia guardada do site
   janela.webContents.on("before-input-event", async (e, input) => {
     if (input.type !== "keyDown") return;
     const k = (input.key || "").toLowerCase();
     if (input.key === "F11"){ e.preventDefault(); janela.setFullScreen(!janela.isFullScreen()); }
+    else if (input.key === "F12"){ e.preventDefault(); janela.webContents.toggleDevTools(); }
     else if ((input.control || input.meta) && input.shift && k === "r"){
       e.preventDefault();
       try { await sessao.clearCache(); await sessao.clearStorageData({ storages: ["serviceworkers", "cachestorage"] }); } catch {}

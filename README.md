@@ -33,6 +33,7 @@ na conta dona do repositório. Para outras pessoas, use o endereço do site (TV)
    (O aviso aparece porque o programa ainda não tem assinatura digital paga.)
 3. O Faixa Livre TV abre e fica no menu Iniciar.
    - **F11**: tela cheia.
+   - **F12**: ferramentas de diagnóstico (para ver o erro exato de um canal).
    - **F5**: recarregar.
    - **Ctrl+Shift+R**: recarregar limpando a cópia guardada do site (use depois de publicar uma versão nova do site).
 

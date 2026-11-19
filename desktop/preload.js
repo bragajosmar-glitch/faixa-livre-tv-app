@@ -4,5 +4,6 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("FaixaLivreTVApp", {
   platform: "desktop",
   version: "1",
+  lastError: url => ipcRenderer.invoke("fltv-erro", String(url || "")),
   setHeaders: (url, referer, ua) => ipcRenderer.send("fltv-headers", { url: String(url || ""), referer: String(referer || ""), ua: String(ua || "") })
 });

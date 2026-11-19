@@ -34,6 +34,7 @@ class MainActivity : Activity() {
     private lateinit var web: WebView
     private val appUrl = "https://faixa-livre-tv.web.app/"
     private val cabecalhos = ConcurrentHashMap<String, Pair<String?, String?>>() // servidor -> (referer, user agent)
+    private val erros = ConcurrentHashMap<String, String>() // endereço ou "host:servidor" -> último erro de rede
 
     // endereços que já funcionam bem no navegador: não mexer
     private val semMexer = listOf(
@@ -126,7 +127,11 @@ class MainActivity : Activity() {
             val corpo = if (code >= 400) (c.errorStream ?: ByteArrayInputStream(ByteArray(0))) else c.inputStream
             val motivo = c.responseMessage?.takeIf { it.isNotBlank() } ?: if (code >= 400) "Erro" else "OK"
             WebResourceResponse(mime, charset, code, motivo, saida, corpo)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            val motivo = e.javaClass.simpleName + (e.message?.let { ": $it" } ?: "")
+            if (erros.size > 400) erros.clear()
+            erros[endereco] = motivo
+            try { erros["host:" + URL(endereco).host] = motivo } catch (_: Exception) {}
             null
         }
     }
@@ -162,6 +167,13 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun version(): String = "1"
+
+        @JavascriptInterface
+        fun lastError(url: String?): String {
+            val u = url ?: return ""
+            erros[u]?.let { return it }
+            return try { erros["host:" + URL(u).host] ?: "" } catch (_: Exception) { "" }
+        }
     }
 
     private fun js(codigo: String) = web.evaluateJavascript(codigo, null)
