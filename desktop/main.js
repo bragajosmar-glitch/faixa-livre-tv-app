@@ -55,9 +55,15 @@ function criarJanela() {
   const sessao = janela.webContents.session;
 
   // cabeçalhos pedidos pelo site para canais específicos
+  // vídeo dos canais: pede como um player comum (VLC, TV), sem dizer que vem de um site.
+  // Muitos servidores recusam (erro 403) pedidos que chegam com a marca de outro site.
   sessao.webRequest.onBeforeSendHeaders((d, cb) => {
-    let host = ""; try { host = new URL(d.url).host; } catch {}
-    const h = cabecalhos.get(host), rh = d.requestHeaders;
+    let host = "", nome = ""; try { const u = new URL(d.url); host = u.host; nome = u.hostname; } catch {}
+    const rh = d.requestHeaders;
+    if (d.resourceType !== "mainFrame" && nome && !PROPRIOS.test(nome) && !SEM_MEXER.test(nome)) {
+      for (const k of Object.keys(rh)) if (/^(origin|referer|sec-fetch-(site|mode|dest)|sec-ch-ua.*)$/i.test(k)) delete rh[k];
+    }
+    const h = cabecalhos.get(host);
     if (h) { if (h.referer) rh["Referer"] = h.referer; if (h.ua) rh["User-Agent"] = h.ua; }
     cb({ requestHeaders: rh });
   });
